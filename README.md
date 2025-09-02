@@ -5,7 +5,7 @@ Modeling human behavior in urban environments is fundamental for social science,
 
 
 <p align="center">
-<img src="method.png">
+<img src="overall_citysim.png">
   <br>
   <em>Figure 1: The CitySim Framework Architecture.</em>
 </p>
