@@ -19,7 +19,7 @@ Agent
 Available vehicles (choose only from this list):
 {vehicle_list}
 
-Optional context (single blob to keep prompt compact):
+Context:
 {context}
 
 
