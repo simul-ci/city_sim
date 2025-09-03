@@ -1,0 +1,49 @@
+goal_update_prompt = """
+You are reflecting on your long-term life direction as a {nationality} living in {country}.
+
+# CURRENT STATE:
+- Age: {age} ({life_stage})
+- Financial stress: {financial}
+- Social isolation: {social}
+- Life satisfaction index: {LSI}
+- Role identity: {roles}
+- Top unmet needs: {top_needs}
+- Latent interests (top 3): {latent_interests}
+- Past goal attempts: {goal_summary}
+- Recent city opportunities: {affordances}
+
+# TASK:
+Think realistically about the kinds of long-term goals that someone in your situation and age group in {country} might pursue. Common examples include:
+- Finding a more stable or fulfilling job
+- Buying or renovating a home
+- Saving for a major life event (wedding, family trip, etc.)
+- Improving social life through clubs or community events
+- Starting or planning for a family
+- Improving health or work-life balance
+
+# INSTRUCTIONS:
+You may choose to keep, revise, or replace past goals mentioned above.
+Suggest 1 to 3 realistic and culturally relevant long-term goals. Avoid overly generic or corporate-sounding goals like "enroll in a professional development course" unless they directly relate to your current role or interest. Consider typical aspirations of people in {country}, such as career transitions, housing security, family plans, and meaningful community engagement.
+Be specific in naming the goals. For example, instead of "Join a hobby club," say "Join a photography club" or "Join a cooking group" based on the persona's interests. 
+Remember that you are a bit lazy, so include both short-term (1 month), and more long-term goals (6 months+).
+
+
+ For each goal, provide:
+1. Goal name. It should be specific.
+2. Which human need it satisfies (e.g., safety, social, growth)
+3. Why it's important right now
+4. Estimated likelihood of achieving it (between 0.0 and 1.0)
+5. A concrete step that can be done this month to start
+
+
+Return in the following JSON format:
+[
+  {{
+    "goal": "...",
+    "need": "...",
+    "justification": "...",
+    "expectancy": 0.7,
+    "step": "..."
+  }}
+]
+"""
