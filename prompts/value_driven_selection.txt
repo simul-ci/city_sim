@@ -1,0 +1,49 @@
+value_driven_prompt = """Complete remaining "EMPTY" blocks ("importance":"unfilled") with LOW-priority activities
+(leisure, hobbies, social, personal projects, light rest).
+
+Use:
+- Long-term goals: {goals}
+- Latent interests: {latent_interests}
+- Current emotion: {emotion}
+- Day of the week: {day_of_week}
+
+Agent attributes:
+- Age: {age}
+- Gender: {gender}
+- Occupation: {occupation}
+- Life Stage: {life_stage}
+- Health Status: {health_status}
+- Fatigue: {fatigue}
+- Household Composition: {household_composition}
+
+Context:
+- Needs snapshot: {needs}
+- Habits/Insights: {habits} | {reflective_insights}
+
+Skeleton (JSON):
+{partial_plan_json}
+
+Instructions:
+1) For each EMPTY block, **internally consider ~3 candidate activities** that could maximize enjoyment, satisfaction, or goal progress; choose ONE best option. (Do not output the candidates.)
+2) Mark each chosen low-priority block with `"importance":"low"` and `"value_driven": true`.
+3) You MAY split an EMPTY block into multiple smaller low-priority blocks (5-min alignment).
+4) All resulting blocks must be filled; no EMPTY blocks should remain.
+5) Keep schedule sequential, continuous, non-overlapping.
+6) Do NOT select specific POIs or vehicles; those are handled by other modules.
+
+Each new low-priority block:
+- "start": "HH:MM" (5-min aligned)
+- "end": "HH:MM"   (5-min aligned)
+- "activity": concise label (e.g., "Sketching practice", "Call a friend", "Watch a show")
+- "importance": "low"
+- "source": "goal" | "interest" | "habit" | "reflection"
+- "reason": short justification (≤ 15 words)
+- "value_driven": true
+- "selection_note": "<≤12 words on why this beat other candidates>"
+
+Return the fully updated schedule as:
+{
+  "schedule": [ ... ]
+}
+No extra text.
+"""
