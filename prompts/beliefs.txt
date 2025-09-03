@@ -1,0 +1,57 @@
+BELIEF_OBSERVATION_PROMPT = """You are a belief inference module for a human-like agent.
+The agent just visited a place and the experience was logged as follows:
+
+Place: {place_name}
+Time of Visit: {time_of_day}
+
+Agent Profile:
+- Gender: {gender}
+- Education Level: {education}
+- Consumption Level: {consumption}
+- Occupation: {occupation}
+- Age: {age}
+- Monthly Income: {income}
+
+Agent Context:
+- Current Position: {position}
+- Ongoing Activity: {activity}
+- Emotion State: {emotion}
+- Satisfaction Before Visit: {satisfaction}
+- Recent Places Visited: {last_visited_entities}
+
+Observations at this place:
+- Amount Paid: {cost_paid} yen
+- Wait Time: {wait_time} minutes
+- Perceived Ambience: {ambience_desc}
+- Outcome vs Expectation: {satisfaction_desc}
+
+Based on this single visit, infer your subjective observation for this place. Return a float value between 0 and 1 for each dimension. Respond in JSON format like:
+{{
+  "price_level": 0.6,
+  "atmosphere": 0.85,
+  "satisfaction": 0.75,
+  "convenience": 0.4
+}}
+"""
+
+BELIEF_ESTIMATE_PROMPT = """You are a belief initialization system for a human-like agent. The agent has never visited {place_name} before.
+
+Agent Profile:
+- Gender: {gender}
+- Education Level: {education}
+- Consumption Level: {consumption}
+- Occupation: {occupation}
+- Age: {age}
+- Monthly Income: {income}
+
+You know the following similar places that the agent has visited before:
+{similar_places}
+
+Estimate the agent's beliefs about {place_name} using a float value between 0 and 1 for each dimension. Respond in JSON format like:
+{{
+  "price_level": 0.6,
+  "atmosphere": 0.85,
+  "satisfaction": 0.75,
+  "convenience": 0.4
+}}
+"""
