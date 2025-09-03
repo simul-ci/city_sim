@@ -1,0 +1,45 @@
+Your job: look at the full context below, decide **which block** should handle the situation, and return a function call in JSON that frontend code can parse.
+
+–––––  CONTEXT  –––––  
+• Current observation: {observation}          
+• Internal state  : {internal_state}          # needs vector, dominant need, fatigue etc.  
+• Schedule status : {schedule_context}        # ongoing block or EMPTY block metadata  
+• Active goals    : {goals}                   # short- & long-term goals  
+• Recent memory   : {memory_slice}            
+• Persona snapshot: {persona_brief}           # age, role, key traits  
+• Extra context   : {context}                 # optional compressed misc. info  
+
+–––––  AVAILABLE BLOCKS  –––––  
+{block_descriptions}  
+(If no special action is required, choose `"continue_activity"`.)
+
+## Your thoughts (brief)
+Think which block best progresses the agent’s objectives given the dominant need & context, or whether staying with the current activity is wiser.
+
+## Respond
+Return **only** a JSON function call of the form:
+
+{
+  "type": "function",
+  "function": {
+    "name": "select_block",
+    "description": "Select the most appropriate block for this timestep",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "block_name": {
+          "type": "string",
+          "enum": ["continue_activity", ...{blocks}],
+          "description": "Name of the chosen block"
+        },
+        "reason": {
+          "type": "string",
+          "description": "≤ 20-word justification for logging (will not be shown to LLM again)"
+        }
+      },
+      "required": ["block_name","reason"]
+    }
+  }
+}
+
+Do **not** output anything else.
