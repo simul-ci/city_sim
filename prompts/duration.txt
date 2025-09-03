@@ -12,7 +12,7 @@ Inputs
 - Schedule context: {schedule_context}
 - Persona: {persona}
 - Needs snapshot: {needs}
-- Context (optional): {context}
+- Context: {context}
 
 Rules
 1) Units are minutes; **round to the nearest 5** (min 5).
