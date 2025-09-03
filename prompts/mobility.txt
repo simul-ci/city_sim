@@ -5,7 +5,7 @@ Inputs
 - Persona: {persona}
 - Intention: {intention}
 - Candidate Areas (JSON array): {candidate_areas}
-- Context (optional): {context}
+- Context: {context}
 
 Rules
 - Prefer areas that fit the intention AND the time budget (short budget → nearer areas).
@@ -30,7 +30,7 @@ Inputs
 -------------------------
 {other_info}
 -------------------------
-- Context (optional): {context}
+- Context: {context}
 
 Allowed POI categories: {poi_category}
 
