@@ -8,7 +8,7 @@ Inputs
   {persona}
   - Monthly Income (net): {income}
 - Current Time: {now_time}
-- Context (optional single blob to keep prompt simple): {context}
+- Context: {context}
 
 Rules
 - Satisfaction values are floats in [0,1], where lower = less satisfied / more pressing.
