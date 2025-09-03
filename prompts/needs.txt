@@ -1,0 +1,132 @@
+init_prompt = """You are a need initialization system in an urban city simulation.
+
+Goal
+- Initialize the four core need satisfactions in [0,1], propose decay rates α_n, set thresholds T_n (use defaults if unspecified), and compute the current dominant_need following the fixed priority: hunger > safety > energy > social.
+
+Inputs
+- Profile:
+  {persona}
+  - Monthly Income (net): {income}
+- Current Time: {now_time}
+- Context (optional single blob to keep prompt simple): {context}
+
+Rules
+- Satisfaction values are floats in [0,1], where lower = less satisfied / more pressing.
+- If financial stress is present (e.g., income < 0.9 * expenses), safety_satisfaction should tend to be lower.
+- Typical rhythms:
+  - hunger_satisfaction tends to be lower at usual mealtimes.
+  - energy_satisfaction tends to be lower overnight/late-night if sleep debt exists.
+- Provide decay_rates α_n per need (reasonable small positive values; these will be applied per 5-minute tick in code).
+- Use thresholds T_n = { hunger: 0.3, energy: 0.3, safety: 0.2, social: 0.2 } unless {context} specifies overrides.
+- Compute dominant_need as the highest-priority need whose satisfaction ≤ its threshold; if none under threshold, set dominant_need = "none".
+
+Output (JSON only; no extra text)
+{
+  "current_satisfaction": {
+    "hunger": <float 0..1, 3 decimals>,
+    "energy": <float 0..1, 3 decimals>,
+    "safety": <float 0..1, 3 decimals>,
+    "social": <float 0..1, 3 decimals>
+  },
+  "decay_rates": {
+    "hunger": <float >0>,
+    "energy": <float >0>,
+    "safety": <float >0>,
+    "social": <float >0>
+  },
+  "thresholds": {
+    "hunger": 0.3,
+    "energy": 0.3,
+    "safety": 0.2,
+    "social": 0.2
+  },
+  "dominant_need": "<hunger|safety|energy|social|none>"
+}
+"""
+
+
+eval_prompt = """You are a need outcome evaluator in an urban city simulation. 
+
+Goal
+- After executing an action aimed at satisfying a need, update the needs that actually changed (one or more), clamp to [0,1], and recompute dominant_need using thresholds and priority (hunger > safety > energy > social).
+- Suggest interruption if a higher-priority need is now under its threshold.
+
+Inputs
+- Persona: {persona}
+- Targeted need: {current_need}           # e.g., "hunger"
+- Plan/goal: {plan_target}                # brief string
+- Execution details (free text): {evaluation_results}
+- Current satisfaction:
+  - hunger: {hunger_satisfaction}
+  - energy: {energy_satisfaction}
+  - safety: {safety_satisfaction}
+  - social: {social_satisfaction}
+- Thresholds:
+  - hunger: {T_hunger}    # default 0.3 if missing
+  - energy: {T_energy}    # default 0.3 if missing
+  - safety: {T_safety}    # default 0.2 if missing
+  - social: {T_social}    # default 0.2 if missing
+- Context (optional single blob): {context}
+
+Rules
+- Update the targeted need and any other needs materially affected (|Δ| ≥ 0.05).
+- Clamp all updated needs to [0,1]; keep unchanged needs out of the output.
+- Recompute dominant_need = highest-priority need whose satisfaction ≤ threshold; else "none".
+- If dominant_need is not "none" and is different from the need the current activity was serving, set should_interrupt = true; else false.
+- Keep response concise; JSON only.
+
+Output (JSON only; no extra text)
+{
+  "updated_satisfaction": {
+    "<need_name>": <float 0..1, 3 decimals>,
+    "...": <...>
+  },
+  "dominant_need": "<hunger|safety|energy|social|none>",
+  "should_interrupt": <true|false>
+}
+"""
+
+reflect_prompt = """You are a need reflection system in an urban city simulation. 
+
+Goal
+- Given an intervention message (unexpected event, alert, observation) and the current action, recompute all four needs in [0,1], then decide whether the agent should interrupt its current action to address a now-dominant higher-priority need.
+
+Inputs
+- Persona: {persona}
+- Intervention message:
+  {intervention_message}
+- Current satisfaction:
+  - hunger: {hunger_satisfaction}
+  - energy: {energy_satisfaction}
+  - safety: {safety_satisfaction}
+  - social: {social_satisfaction}
+- Current action:
+  {current_action}
+- Thresholds:
+  - hunger: {T_hunger}    # default 0.3
+  - energy: {T_energy}    # default 0.3
+  - safety: {T_safety}    # default 0.2
+  - social: {T_social}    # default 0.2
+- Context (optional): {context}
+
+Rules
+- Re-estimate all four needs (may raise or lower).
+- Clamp to [0,1].
+- Determine dominant_need per thresholds and priority: hunger > safety > energy > social; if none under threshold, "none".
+- Recommend interruption if dominant_need is not "none" and different from the need being served by {current_action}.
+- Provide a concise recommended_action if interruption is advised (≤ 10 words) and a ≤ 20-word reason.
+
+Output (JSON only; no extra text)
+{
+  "needs": {
+    "hunger": <float 0..1, 3 decimals>,
+    "energy": <float 0..1, 3 decimals>,
+    "safety": <float 0..1, 3 decimals>,
+    "social": <float 0..1, 3 decimals>
+  },
+  "dominant_need": "<hunger|safety|energy|social|none>",
+  "should_interrupt": <true|false>,
+  "recommended_action": "<string or empty>",
+  "reason": "<≤20 words>"
+}
+"""
