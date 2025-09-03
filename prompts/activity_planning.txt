@@ -1,0 +1,115 @@
+high_priority_prompt = """As an intelligent agent's plan system, create a DAILY SKELETON that ONLY includes MANDATORY activities:
+- Sleep (must be included)
+- Work or school (if relevant to the agent's occupation)
+- Commute segments to/from work/school when location ≠ home
+- Medical appointments or other unavoidable obligations (if any)
+
+All other time periods must be explicitly filled with a placeholder labeled "EMPTY".
+
+Schedule requirements:
+- Cover 00:00 to 24:00 inclusive
+- Sequential, non-overlapping blocks
+- Variable durations
+- **All start/end times aligned to 5-minute increments**
+
+Agent attributes:
+- Age: {age}
+- Gender: {gender}
+- Occupation: {occupation}
+- Life Stage: {life_stage}
+- Health Status: {health_status}
+- Fatigue: {fatigue}
+- Household Composition: {household_composition}
+- Current Day of Week: {day_of_week}
+
+Optional context: {context}
+# MAY include:
+# {"home_location":"...", "work_location":"...", "is_remote":false,
+#  "known_commitments":[{"start":"14:30","end":"15:15","activity":"Doctor"}],
+#  "typical_work_hours":"09:00-17:30"}
+
+Response format:
+Return a JSON object with a single key "schedule" whose value is an array of blocks.
+Each block must contain:
+- "start": "HH:MM" (5-min aligned)
+- "end":   "HH:MM" (5-min aligned)
+- "activity": e.g., "Sleep", "Work", "Commute to work", or "EMPTY"
+- "importance": "mandatory" or "unfilled"
+- "source": e.g., "sleep_need", "occupation", "appointment"
+- "reason": short explanation
+
+Do not include any extra text. Example shape only:
+
+{
+  "schedule": [
+    {
+      "start": "00:00",
+      "end": "06:30",
+      "activity": "Sleep",
+      "importance": "mandatory",
+      "source": "sleep_need",
+      "reason": "Overnight rest based on fatigue and routine"
+    },
+    {
+      "start": "06:30",
+      "end": "08:00",
+      "activity": "EMPTY",
+      "importance": "unfilled",
+      "source": "",
+      "reason": ""
+    },
+    {
+      "start": "08:00",
+      "end": "08:45",
+      "activity": "Commute to work",
+      "importance": "mandatory",
+      "source": "occupation",
+      "reason": "Travel from home to workplace"
+    },
+    ...
+  ]
+}"""
+
+
+medium_activity_prompt = """You are refining the agent's schedule by filling MEDIUM-priority essentials (meals, hygiene, childcare, important errands).
+
+Agent attributes:
+- Age: {age}
+- Gender: {gender}
+- Occupation: {occupation}
+- Life Stage: {life_stage}
+- Health Status: {health_status}
+- Fatigue: {fatigue}
+- Household Composition: {household_composition}
+- Current Day of Week: {day_of_week}
+
+Context:
+{context}
+
+Current skeleton (JSON):
+{partial_plan_json}
+
+Instructions:
+1) Fill ONLY blocks labeled "EMPTY" ("importance":"unfilled") with MEDIUM-priority tasks.
+2) You MAY split an EMPTY block into smaller blocks; ensure **5-minute alignment**.
+3) Some sub-blocks may remain "EMPTY" (unfilled) for later value-driven planning.
+4) Do NOT modify existing mandatory blocks.
+5) Keep schedule sequential, non-overlapping, and time-aligned.
+6) Do NOT select specific locations or vehicles here (mobility is handled elsewhere).
+7) Set "importance":"medium" on newly created medium-priority tasks.
+8) Use realistic timing (e.g., breakfast 06:00–09:00, lunch 11:30–13:30, dinner 18:00–20:30), adapted to persona/habits/needs.
+
+Each filled block must include:
+- "start": "HH:MM" (5-min aligned)
+- "end": "HH:MM"   (5-min aligned)
+- "activity": e.g., "Shower", "Prepare and eat lunch", "Grocery errand"
+- "importance": "medium"
+- "source": e.g., "habit", "persona", "needs", "household"
+- "reason": short explanation
+
+Return the entire updated schedule as:
+{
+  "schedule": [ ... all blocks including unchanged mandatory, updated empties ... ]
+}
+No extra text.
+"""
