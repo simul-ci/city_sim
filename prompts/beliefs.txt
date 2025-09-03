@@ -2,6 +2,7 @@ BELIEF_OBSERVATION_PROMPT = """You are a belief inference module for a human-lik
 The agent just visited a place and the experience was logged as follows:
 
 Place: {place_name}
+POI Description: {poi_description}
 Time of Visit: {time_of_day}
 
 Agent Profile:
@@ -15,7 +16,7 @@ Agent Profile:
 Agent Context:
 - Current Position: {position}
 - Ongoing Activity: {activity}
-- Emotion State: {emotion}
+- Emotional State: {emotion}
 - Satisfaction Before Visit: {satisfaction}
 - Recent Places Visited: {last_visited_entities}
 
@@ -25,13 +26,19 @@ Observations at this place:
 - Perceived Ambience: {ambience_desc}
 - Outcome vs Expectation: {satisfaction_desc}
 
-Based on this single visit, infer your subjective observation for this place. Return a float value between 0 and 1 for each dimension. Respond in JSON format like:
-{{
-  "price_level": 0.6,
-  "atmosphere": 0.85,
-  "satisfaction": 0.75,
-  "convenience": 0.4
-}}
+Based on this single visit, infer your subjective observation for this place on four dimensions in [0,1], where higher is better:
+- price  (affordability / price satisfaction; higher = cheaper/better value than expected)
+- atmosphere
+- satisfaction
+- convenience
+
+Respond in JSON only (no extra text), round to 3 decimals, e.g.:
+{
+  "price": 0.600,
+  "atmosphere": 0.850,
+  "satisfaction": 0.750,
+  "convenience": 0.400
+}
 """
 
 BELIEF_ESTIMATE_PROMPT = """You are a belief initialization system for a human-like agent. The agent has never visited {place_name} before.
@@ -44,14 +51,22 @@ Agent Profile:
 - Age: {age}
 - Monthly Income: {income}
 
-You know the following similar places that the agent has visited before:
+Similar places previously visited by the agent (may include names, categories, and/or belief vectors):
 {similar_places}
 
-Estimate the agent's beliefs about {place_name} using a float value between 0 and 1 for each dimension. Respond in JSON format like:
-{{
-  "price_level": 0.6,
-  "atmosphere": 0.85,
-  "satisfaction": 0.75,
-  "convenience": 0.4
-}}
+Estimate the agent's beliefs about {place_name} on four dimensions in [0,1], where higher is better:
+- price  (affordability / price satisfaction; higher = cheaper/better value than expected)
+- atmosphere
+- satisfaction
+- convenience
+
+If specific belief vectors for similar places are provided, use them to inform your estimate; otherwise infer from categories and profile. If information is insufficient, return neutral 0.500 values.
+
+Respond in JSON only (no extra text), round to 3 decimals, e.g.:
+{
+  "price": 0.600,
+  "atmosphere": 0.850,
+  "satisfaction": 0.750,
+  "convenience": 0.400
+}
 """
