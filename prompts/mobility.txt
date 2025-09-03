@@ -1,0 +1,133 @@
+area_selection_pronpt = """You are an area selector in an urban simulation. Decide whether to stay nearby or travel further by choosing ONE area from the candidate list.
+
+Inputs
+- User Plan: {plan}
+- Persona: {persona}
+- Intention: {intention}
+- Candidate Areas (JSON array): {candidate_areas}
+- Context (optional): {context}
+
+Rules
+- Prefer areas that fit the intention AND the time budget (short budget → nearer areas).
+- If energy is low, bad weather, or safety concerns, favor closer/indoor-friendly areas.
+- If leisure window is large and emotion positive, longer trips are acceptable.
+
+Output (JSON only; no extra text)
+{
+  "area_id": "<from candidate_areas>",
+  "area_name": "<string>",
+  "reason": "<≤20 words>"
+}
+"""
+
+place_selection_prompt = """You are a POI type selector in an urban simulation, decide the most appropriate POI TYPE for the current intention.
+
+Inputs
+- User Plan: {plan}
+- Persona: {persona}
+- Intention: {intention}
+- Other information:
+-------------------------
+{other_info}
+-------------------------
+- Context (optional): {context}
+
+Allowed POI categories: {poi_category}
+
+Rules
+- Choose the single best-fitting place_type from {poi_category}.
+- Consider feasibility (time budget, age/role, weather/indoor/outdoor).
+- If tied, pick the safer/closer option for short time budgets.
+
+Output (JSON only; no extra text)
+{
+  "place_type": "<one of poi_category>",
+  "secondary_types": ["<optional, 0..3 related types>"]
+}
+"""
+
+place_type_prompt = """Refine a chosen POI TYPE to a more specific subtype.
+
+Inputs
+- Primary place type: {primary_place_type}
+- User Plan: {plan}
+- Persona: {persona}
+- Intention: {intention}
+- Other information:
+-------------------------
+{other_info}
+-------------------------
+- Context (optional): {context}
+
+Allowed subtypes: {poi_category}
+
+Rules
+- Return exactly one subtype from {poi_category} that is a valid refinement of {primary_place_type}.
+- Prefer options feasible under time/weather and persona constraints.
+
+Output (JSON only; no extra text)
+{
+  "place_type": "<one of poi_category>",
+  "reason": "<≤15 words>"
+}
+"""
+
+place_analysis_prompt = """Analyze the intention and produce POI FILTERS/CONSTRAINTS for micro-level selection (a gravity model will rank candidates).
+
+Inputs
+- User Plan: {plan}
+- Persona: {persona}
+- Intention: {intention}
+- Other information:
+-------------------------
+{other_info}
+-------------------------
+- Context (optional): {context}
+
+Allowed canonical places (optional): {place_list}
+  # If the intention clearly maps to one canonical class (e.g., "home","work"),
+  # you MAY set "canonical_place" to one of these. Otherwise omit it.
+
+Rules
+- Do NOT choose a specific POI; your output feeds a gravity scorer.
+- Provide only constraints/filters; keep them realistic and consistent with persona and context.
+
+Output (JSON only; no extra text)
+{
+  "canonical_place": "<one of place_list or empty>",
+  "filters": {
+    "poi_types": ["<one or more types>"],
+    "indoor": <true|false|null>,
+    "price_tier": "<low|mid|high|null>",
+    "quietness": "<low|medium|high|null>",
+    "kid_friendly": <true|false|null>,
+    "accessibility_required": <true|false|null>,
+    "max_radius_m": <integer or null>,
+    "time_budget_min": <integer or null>
+  }
+}
+"""
+
+radius_prompt = """Decide the maximum travel radius (meters) for the next trip.
+
+Inputs
+- Weather: {weather}
+- Temperature: {temperature}
+- Emotion: {emotion_types}
+- Current thought: {thought}
+- Other information:
+-------------------------
+{other_info}
+-------------------------
+- Context (optional): {context}
+Rules
+- Return a single integer between 3000 and 200000 (meters).
+- Smaller radius if time budget is short, energy is low, or weather/safety is poor.
+- Larger radius if emotion is positive, time budget is large, and fast transport is available.
+
+Output (JSON only; no extra text)
+{
+  "radius": <integer meters>,
+  "reason": "<≤20 words>"
+}
+"""
